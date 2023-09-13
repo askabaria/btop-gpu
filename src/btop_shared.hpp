@@ -99,6 +99,8 @@ namespace Gpu {
 
 	extern unordered_flat_map<string, deque<long long>> shared_gpu_percent; // averages, power/vram total
 
+	extern bool initialized;
+
   const array mem_names { "used"s, "free"s };
 
 	//* Container for process information // TODO
@@ -151,18 +153,15 @@ namespace Gpu {
 		// vector<proc_info> compute_processes = {};
 	};
 
-	namespace Nvml {
-		extern bool shutdown();
-	}
-	namespace Rsmi {
-		extern bool shutdown();
-	}
+	//* Initialize or shutdown GPU vendor-specific libraries
+	extern bool init();
+	extern bool shutdown(bool);
 
 	//* Collect gpu stats and temperatures
-    auto collect(bool no_update = false) -> vector<gpu_info>&;
+  auto collect(bool no_update = false) -> vector<gpu_info>&;
 
 	//* Draw contents of gpu box using <gpus> as source
-  	string draw(const gpu_info& gpu, unsigned long index, bool force_redraw, bool data_same);
+  string draw(const gpu_info& gpu, unsigned long index, bool force_redraw, bool data_same);
 }
 
 namespace Cpu {

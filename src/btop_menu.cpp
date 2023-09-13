@@ -430,6 +430,10 @@ namespace Menu {
 				"True or False."},
 		},
 		{
+			{"enable_gpu",
+				"Enable GPU monitoring.",
+				"",
+				"True or False."},
 			{"nvml_measure_pcie_speeds",
 				"Measure PCIe throughput on NVIDIA cards.",
 				"",

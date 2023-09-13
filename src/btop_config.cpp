@@ -194,6 +194,8 @@ namespace Config {
 		{"log_level", 			"#* Set loglevel for \"~/.config/btop/btop.log\" levels are: \"ERROR\" \"WARNING\" \"INFO\" \"DEBUG\".\n"
 								"#* The level set includes all lower levels, i.e. \"DEBUG\" will show all logging info."},
 
+		{"enable_gpu",			"#* Enable GPU monitoring."},
+
 		{"nvml_measure_pcie_speeds",
 								"#* Measure PCIe throughput on NVIDIA cards, may impact performance on certain cards."},
 
@@ -287,6 +289,7 @@ namespace Config {
 		{"lowcolor", false},
 		{"show_detailed", false},
 		{"proc_filtering", false},
+		{"enable_gpu", true},
 		{"nvml_measure_pcie_speeds", true},
 		{"gpu_mirror_graph", true},
 	};

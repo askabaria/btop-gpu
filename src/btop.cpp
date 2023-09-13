@@ -228,7 +228,7 @@ void term_resize(bool force) {
 				else if (std::isdigit(*key.c_str())) {
 					Config::current_preset = -1;
 					auto box = all_boxes.at(*key.c_str() - '0');
-					if (box.rfind("gpu", 0) == 0 && (box[3] - '0' + 2) > (int)Gpu::gpu_names.size()) return;
+					if (box.rfind("gpu", 0) == 0 && (box[3] - '0' + 1) > (int)Gpu::gpu_names.size()) return;
 					Config::toggle_box(box);
 					boxes = Config::getS("shown_boxes");
 				}
@@ -263,8 +263,7 @@ void clean_quit(int sig) {
 	#endif
 	}
 
-	Gpu::Nvml::shutdown();
-	Gpu::Rsmi::shutdown();
+	Gpu::shutdown(true);
 
 	Config::write();
 
@@ -509,20 +508,21 @@ namespace Runner {
 			//* Run collection and draw functions for all boxes
 			try {
 				//? GPU data collection
-				bool gpu_in_cpu_panel = Config::getS("cpu_graph_lower").rfind("gpu-", 0) == 0
-									 or Config::getS("cpu_graph_upper").rfind("gpu-", 0) == 0;
-
 				vector<unsigned int> gpu_panels = {};
-				for (auto& box : conf.boxes)
-					if (box.rfind("gpu", 0) == 0)
-						gpu_panels.push_back(box.back()-'0');
-
 				vector<Gpu::gpu_info> gpus;
-				if (gpu_in_cpu_panel or not gpu_panels.empty()) {
+
+				if (Config::getB("enable_gpu")) {
+					if (not Gpu::initialized) Gpu::init();
+
+					for (auto& box : conf.boxes)
+						if (box.rfind("gpu", 0) == 0)
+							gpu_panels.push_back(box.back()-'0');
+
 					if (Global::debug) debug_timer("gpu", collect_begin);
 					gpus = Gpu::collect(conf.no_update);
 					if (Global::debug) debug_timer("gpu", collect_done);
-				}
+				} else if (Gpu::initialized) Gpu::shutdown(false);
+
 				auto& gpus_ref = gpus;
 
 				//? CPU
@@ -554,7 +554,7 @@ namespace Runner {
 				}
 
 				//? GPU
-				if (not gpu_panels.empty() and not gpus_ref.empty()) {
+				if (Config::getB("enable_gpu") and not gpu_panels.empty() and not gpus_ref.empty()) {
 					try {
 						if (Global::debug) debug_timer("gpu", draw_begin_only);
 

@@ -557,6 +557,11 @@ namespace Cpu {
 			//? Graphs & meters
 			const int graph_default_width = x + width - b_width - 3;
 
+			if (not Config::getB("enable_gpu")) {
+				if (graph_up_field.rfind("gpu", 0) == 0 || graph_lo_field.rfind("gpu", 0) == 0)
+					return ""; // Wait for Gpu::shutdown()
+			}
+
 			auto init_graphs = [&](vector<Draw::Graph>& graphs, const int graph_height, int& graph_width, const string& graph_field, bool invert) {
 				if (graph_field.rfind("gpu", 0) == 0) {
 					if (graph_field.find("totals") != string::npos) {
@@ -791,7 +796,6 @@ namespace Cpu {
 		}
 
 		//? Load average
-		bool show_gpu = (graph_lo_field.rfind("gpu-", 0) == 0) or (graph_up_field.rfind("gpu-", 0) == 0);
 		if (cy < b_height - 1 and cc <= b_columns) {
 			string lavg_pre;
 			int sep = 1;
@@ -817,11 +821,11 @@ namespace Cpu {
 			} else {
 				lavg_str_len = lavg_str.length();
 			}
-			out += Mv::to(b_y + b_height - 2 - show_gpu*(gpus.size() - Gpu::shown), b_x + cx + 1) + Theme::c("main_fg") + lavg_str;
+			out += Mv::to(b_y + b_height - 2 - Config::getB("enable_gpu")*(gpus.size() - Gpu::shown), b_x + cx + 1) + Theme::c("main_fg") + lavg_str;
 		}
 
 		//? Gpu brief info
-		if (show_gpu) {
+		if (Config::getB("enable_gpu")) {
 			auto shown_panels_count = 0u;
 			for (unsigned long i = 0; i < gpus.size(); ++i) {
 				if (not v_contains(Gpu::shown_panels, i)) {
@@ -1914,7 +1918,7 @@ namespace Draw {
 
 		Cpu::shown = s_contains(boxes, "cpu");
 		Gpu::shown_panels.clear();
-		if (not Gpu::gpu_names.empty()) {
+		if (Config::getB("enable_gpu") and not Gpu::gpu_names.empty()) {
 			std::istringstream iss(boxes, std::istringstream::in);
 			string current;
 			while (iss >> current)
@@ -1934,11 +1938,7 @@ namespace Draw {
 		//* Calculate and draw cpu box outlines
 		if (Cpu::shown) {
 			using namespace Cpu;
-			const bool gpus_shown_in_cpu_panel = (
-				Config::getS("cpu_graph_lower") == "default"
-				or Config::getS("cpu_graph_lower").rfind("gpu-", 0) == 0
-				or Config::getS("cpu_graph_upper").rfind("gpu-", 0) == 0
-			) and Gpu::gpu_names.size() != (unsigned long)Gpu::shown;
+			const bool gpus_shown_in_cpu_panel = Config::getB("enable_gpu") and Gpu::gpu_names.size() != (unsigned long)Gpu::shown;
 			const int gpus_height_offset = (Gpu::gpu_names.size() - Gpu::shown)*gpus_shown_in_cpu_panel;
             const bool show_temp = (Config::getB("check_temp") and got_sensors);
 			width = round((double)Term::width * width_p / 100);

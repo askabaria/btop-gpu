@@ -265,7 +265,7 @@ namespace Input {
 					Config::current_preset = -1;
 					static const array<string, 10> boxes = {"gpu5", "cpu", "mem", "net", "proc", "gpu0", "gpu1", "gpu2", "gpu3", "gpu4"};
 					auto box = boxes.at(*key.c_str() - '0');
-					if (box.rfind("gpu", 0) == 0 && (box[3] - '0' + 2) > (int)Gpu::gpu_names.size()) return;
+					if (box.rfind("gpu", 0) == 0 && (box[3] - '0' + 1) > (int)Gpu::gpu_names.size()) return;
 					Config::toggle_box(box);
 					Draw::calcSizes();
 					Runner::run("all", false, true);
